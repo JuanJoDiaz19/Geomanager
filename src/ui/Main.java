@@ -15,15 +15,16 @@ public class Main {
 
     public void execute() {
         geograficControler = new GeograficControler();
+        sc = new Scanner(System.in);
         System.out.println("==============================="+
                             "\n    WELCOME TO GEOMANAGER    "+
                             "\n===============================\n");
         int option;
         do {
-            System.out.println("Select one of the following options:"+
+            System.out.println("Select one of the following options:\n"+
                     "1. Insert command\n" +
                     "2. Import data from .SQL file\n" +
-                    "2. Leave\n");
+                    "3. Leave\n");
             option = Integer.parseInt(sc.nextLine());
             executeOption(option);
         } while (option != 3);
