@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GeograficControler {
     private ArrayList<Country> countries;
@@ -15,7 +16,7 @@ public class GeograficControler {
         String[] split = command.split(" ");
         String firstCommand = split[0];
         if (firstCommand.equals("INSERT")) {
-            addData(split);
+            addData(command);
         } else if (firstCommand.equals("SELECT")) {
             boolean flag = false;
             for (String s: split) {
@@ -33,9 +34,30 @@ public class GeograficControler {
         }
     }
 
-    public void addData(String[] command){
-        //
+    public void addData(String command){
+        String[] arrCommand = command.split(" VALUES ");
+        if(arrCommand[0].equals("INSERT INTO countries(id, name, population, countryCode)")){
+            String values = arrCommand[1].replace("'" ,"");
+            values = values.replace(" ", "");
+            values = values.replace("(", "");
+            values = values.replace(")", "");
+            values = values.replace("'", "");
+            String[] parameters = values.split(",");
+            countries.add(new Country(parameters[0], parameters[1], Double.parseDouble(parameters[2]), parameters[3]));
+            System.out.println("The country was added :)");
+        } else if ( arrCommand[0].equals("INSERT INTO cities(id, name, countryID, population)")) {
+            String values = arrCommand[1].replace("'" ,"");
+            values = values.replace(" ", "");
+            values = values.replace("(", "");
+            values = values.replace(")", "");
+            values = values.replace("'", "");
+            String[] parameters = values.split(",");
+            if (searchCountryByID(parameters[2])){
+                cities.add(new City(parameters[0], parameters[1], parameters[2], Integer.parseInt(parameters[3])));
+                System.out.println("The country was added :)");
+            }
 
+        }
     }
 
     public void searchData(String[] command) {
@@ -55,5 +77,12 @@ public class GeograficControler {
 
     public void saveData(){
 
+    }
+
+    public boolean searchCountryByID(String id) {
+        for (Country c: countries) {
+            if(c.getId().equals(id)) return true;
+        }
+        return false;
     }
 }
