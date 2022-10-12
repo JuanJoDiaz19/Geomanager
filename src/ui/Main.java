@@ -21,14 +21,18 @@ public class Main {
         System.out.println("==============================="+
                             "\n    WELCOME TO GEOMANAGER    "+
                             "\n===============================\n");
-        int option;
+        int option = 0;
         do {
             System.out.println("Select one of the following options:\n"+
                     "1. Insert command\n" +
                     "2. Import data from .SQL file\n" +
                     "3. Leave\n");
-            option = Integer.parseInt(sc.nextLine());
-            executeOption(option);
+            try {
+                option = Integer.parseInt(sc.nextLine());
+                executeOption(option);
+            }catch (NumberFormatException ex){
+                ex.printStackTrace();
+            }
         } while (option != 3);
     }
 
@@ -56,19 +60,21 @@ public class Main {
         if(split[0].equals("INSERT")){
             try {
                 geograficControler.addData(s);
-            } catch (WrongFormatParameterException ex) {
-                ex.printStackTrace();
-            } catch (CountryNotFoundException ex) {
+            } catch (WrongFormatParameterException | CountryNotFoundException ex) {
                 ex.printStackTrace();
             }
         } else if (split[0].equals("SELECT")) {
-            if(s.contains("ORDER BY")){
-                geograficControler.orderData(s);
-            } else {
-                geograficControler.searchData(s);
-            }
+            try {
+                if (s.contains("ORDER BY")) {
+                    geograficControler.orderData(s);
+                } else {
+                    geograficControler.searchData(s);
+                }
+            }catch (WrongFormatParameterException ex){ex.printStackTrace();}
         } else if(split[0].equals("DELETE")){
             geograficControler.deleteInformation(s);
+        }else{
+            System.out.println("Please enter a valid command");
         }
     }
 
