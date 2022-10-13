@@ -2,9 +2,9 @@ package model;
 
 public class City extends Location {
     private String countryID;
-    private Integer population;
+    private Double population;
 
-    public City(String id, String name, String countryID, Integer population) {
+    public City(String id, String name, String countryID, Double population) {
         super(id, name);
         this.countryID = countryID;
         this.population = population;
@@ -18,11 +18,11 @@ public class City extends Location {
         this.countryID = countryID;
     }
 
-    public Integer getPopulation() {
+    public Double getPopulation() {
         return population;
     }
 
-    public void setPopulation(Integer population) {
+    public void setPopulation(Double population) {
         this.population = population;
     }
 }
