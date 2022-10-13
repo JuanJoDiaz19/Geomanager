@@ -25,4 +25,8 @@ public class City extends Location {
     public void setPopulation(Double population) {
         this.population = population;
     }
+    @Override
+    public String print(){
+        return super.print()+"City ID:"+getId()+"\n City Name"+getName()+"\n Country ID"+countryID+"\n City population"+population;
+    }
 }

@@ -2,6 +2,7 @@ package ui;
 
 import exceptions.CountryNotFoundException;
 import exceptions.WrongFormatParameterException;
+import exceptions.AlreadyExists;
 import model.GeograficControler;
 
 import java.util.Scanner;
@@ -60,7 +61,7 @@ public class Main {
         if(split[0].equals("INSERT")){
             try {
                 geograficControler.addData(s);
-            } catch (WrongFormatParameterException | CountryNotFoundException ex) {
+            } catch (WrongFormatParameterException | CountryNotFoundException | AlreadyExists ex) {
                 ex.printStackTrace();
             }
         } else if (split[0].equals("SELECT")) {
@@ -68,7 +69,7 @@ public class Main {
                 if (s.contains("ORDER BY")) {
                     geograficControler.orderData(s);
                 } else {
-                    geograficControler.searchData(s);
+                    geograficControler.searchingData(s);
                 }
             }catch (WrongFormatParameterException ex){ex.printStackTrace();}
         } else if(split[0].equals("DELETE")){

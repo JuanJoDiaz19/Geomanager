@@ -1,5 +1,6 @@
 package model;
 
+import exceptions.AlreadyExists;
 import exceptions.CountryNotFoundException;
 import exceptions.WrongFormatParameterException;
 
@@ -13,35 +14,60 @@ public class GeograficControler {
         countries = new ArrayList<>();
         cities = new ArrayList<>();
     }
-    public void addData(String command) throws WrongFormatParameterException, CountryNotFoundException {
+    public void addData(String command) throws WrongFormatParameterException, CountryNotFoundException, AlreadyExists {
         String[] arrCommand = command.split(" VALUES ");
-        boolean flag = true;
         if(arrCommand[0].equals("INSERT INTO countries(id, name, population, countryCode)")){
             String values = arrCommand[1].replace(" " ,"");
-            if(!(values.charAt(0) == '(' && values.charAt(values.length()-1) == ')')) throw new WrongFormatParameterException();
-            values = values.replace("(", "");
-            values = values.replace(")", "");
-            String[] parameters = values.split(",");
-            if(!isStringFormat(parameters[0]) || !isStringFormat(parameters[1]) || !isStringFormat(parameters[3]) || !isDoubleNumber(parameters[2])) throw new WrongFormatParameterException();
-            values = values.replace("'","");
-            String[] finalParameters = values.split(",");
-            countries.add(new Country(finalParameters[0], finalParameters[1], Double.parseDouble(finalParameters[2]), finalParameters[3]));
-            System.out.println("The country was added :)");
+            if(isStringFormatPar(values)) {
+                values = values.replace("(", "");
+                values = values.replace(")", "");
+                String[] parameters = values.split(",");
+                if (isStringFormat(parameters[0]) || isStringFormat(parameters[1]) || isStringFormat(parameters[3]) || isDoubleNumber(parameters[2])){
+                    values = values.replace("'", "");
+                    String[] finalParameters = values.split(",");
+                    if(!searchCountryByID(finalParameters[0])) {
+                        countries.add(new Country(finalParameters[0], finalParameters[1], Double.parseDouble(finalParameters[2]), finalParameters[3]));
+                        System.out.println("The country was added :)");
+                        return;
+                    }else {
+                        throw new AlreadyExists();
+                    }
+                }
+            }
+            throw new WrongFormatParameterException();
         } else if ( arrCommand[0].equals("INSERT INTO cities(id, name, countryID, population)")) {
             String values = arrCommand[1].replace(" " ,"");
-            if(!(values.charAt(0) == '(' && values.charAt(values.length()-1) == ')')) throw new WrongFormatParameterException();
-            values = values.replace("(", "");
-            values = values.replace(")", "");
-            String[] parameters = values.split(",");
-            if(!isStringFormat(parameters[0]) || !isStringFormat(parameters[1]) || !isStringFormat(parameters[2]) || !isDoubleNumber(parameters[3])) throw new WrongFormatParameterException();
-            values = values.replace("'","");
-            String[] finalParameters = values.split(",");
-            if (searchCountryByID(finalParameters[2])){
-                cities.add(new City(finalParameters[0], finalParameters[1], finalParameters[2], Double.parseDouble(finalParameters[3])));
-                System.out.println("The city was added :)");
-            } else {
-                throw new CountryNotFoundException();
+            if(isStringFormatPar(values)) {
+                values = values.replace("(", "");
+                values = values.replace(")", "");
+                String[] parameters = values.split(",");
+                if (isStringFormat(parameters[0]) || isStringFormat(parameters[1]) || isStringFormat(parameters[2]) || isDoubleNumber(parameters[3])){
+                    values = values.replace("'", "");
+                    String[] finalParameters = values.split(",");
+                    if(!searchCityByID(finalParameters[0])){
+                        if (searchCountryByID(finalParameters[2])) {
+                            cities.add(new City(finalParameters[0], finalParameters[1], finalParameters[2], Double.parseDouble(finalParameters[3])));
+                            System.out.println("The city was added :)");
+                            return;
+                        } else {
+                            throw new CountryNotFoundException();
+                        }
+                    }else {
+                        throw new AlreadyExists();
+                    }
+                }
             }
+            throw new WrongFormatParameterException();
+        }
+    }
+    public void searchingData(String command) throws WrongFormatParameterException {
+        ArrayList<Location> tem;
+        tem = searchData(command);
+        printLocation(tem);
+    }
+    public void printLocation(ArrayList<Location> tem){
+        for (Location l:tem){
+            System.out.println(l.print());
         }
     }
     public ArrayList<Location> searchData(String command) throws WrongFormatParameterException {
@@ -59,7 +85,7 @@ public class GeograficControler {
                                 //metodo de busqueda por string
                                 return searchingDataEquals(iniCommands[5],true,iniCommands[7]);
                             } else if (iniCommands[3].equals("cities") && (iniCommands[5].equals("id") || iniCommands[5].equals("name") || iniCommands[5].equals("countryID") || iniCommands[5].equals("population"))) {
-                                //metodo de busqueda por string 
+                                //metodo de busqueda por string
                                 return searchingDataEquals(iniCommands[5],false,iniCommands[7]);
                             }
                         }
@@ -97,7 +123,6 @@ public class GeograficControler {
         }
         throw new WrongFormatParameterException();
     }
-
     public ArrayList<Location> searchingDataAll(boolean isCountry){
     ArrayList<Location> tem = new ArrayList<>();
     if(isCountry){
@@ -205,6 +230,9 @@ public class GeograficControler {
         }
         return tem;
     }
+    public boolean isStringFormatPar(String string){
+        return string.charAt(0) == '(' && string.charAt(string.length()-1) == ')';
+    }
     public boolean isStringFormat(String string){
         return string.charAt(0) == '\'' && string.charAt(string.length() -1) == '\'';
     }
@@ -243,6 +271,12 @@ public class GeograficControler {
 
     }
 
+    public boolean searchCityByID(String id) {
+        for (City c: cities) {
+            if(c.getId().equals(id)) return true;
+        }
+        return false;
+    }
     public boolean searchCountryByID(String id) {
         for (Country c: countries) {
             if(c.getId().equals(id)) return true;
