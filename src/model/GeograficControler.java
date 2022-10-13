@@ -44,41 +44,6 @@ public class GeograficControler {
             }
         }
     }
-/*
-    public void addData(String command) throws WrongFormatParameterException, CountryNotFoundException {
-        String[] arrCommand = command.split(" VALUES ");
-        boolean flag = true;
-        if(arrCommand[0].equals("INSERT INTO countries(id, name, population, countryCode)")){
-            String values = arrCommand[1].replace(" " ,"");
-                if(!(values.charAt(0) == '(' && values.charAt(values.length()-1) == ')')) flag = false;
-            values = values.replace("(", "");
-            values = values.replace(")", "");
-            String[] parameters = values.split(",");
-                if(!isStringFormat(parameters[0]) || !isStringFormat(parameters[1]) || !isStringFormat(parameters[3]) || !isNumber(parameters[2])) throw new WrongFormatParameterException();
-            values = values.replace("'","");
-            String[] finalParameters = values.split(",");
-            countries.add(new Country(finalParameters[0], finalParameters[1], Double.parseDouble(finalParameters[2]), finalParameters[3]));
-            System.out.println("The country was added :)");
-        } else if ( arrCommand[0].equals("INSERT INTO cities(id, name, countryID, population)")) {
-            String values = arrCommand[1].replace(" " ,"");
-            if(!(values.charAt(0) == '(' && values.charAt(values.length()-1) == ')')) flag = false;
-            values = values.replace("(", "");
-            values = values.replace(")", "");
-            String[] parameters = values.split(",");
-            if(!isStringFormat(parameters[0]) || !isStringFormat(parameters[1]) || !isStringFormat(parameters[2]) || !isNumber(parameters[3])) throw new WrongFormatParameterException();
-            values = values.replace("'","");
-            String[] finalParameters = values.split(",");
-            if (searchCountryByID(finalParameters[2])){
-                cities.add(new City(finalParameters[0], finalParameters[1], finalParameters[2], Integer.parseInt(finalParameters[3])));
-                System.out.println("The country was added :)");
-            } else {
-                throw new CountryNotFoundException();
-            }
-        }
-    }
-
- */
-
     public ArrayList<Location> searchData(String command) throws WrongFormatParameterException {
         String[] iniCommands = command.split(" ");
         if(iniCommands[1].equals("*") && iniCommands[2].equals("FROM")){
@@ -94,7 +59,7 @@ public class GeograficControler {
                                 //metodo de busqueda por string
                                 return searchingDataEquals(iniCommands[5],true,iniCommands[7]);
                             } else if (iniCommands[3].equals("cities") && (iniCommands[5].equals("id") || iniCommands[5].equals("name") || iniCommands[5].equals("countryID") || iniCommands[5].equals("population"))) {
-                                //metodo de busqueda por string
+                                //metodo de busqueda por string 
                                 return searchingDataEquals(iniCommands[5],false,iniCommands[7]);
                             }
                         }
