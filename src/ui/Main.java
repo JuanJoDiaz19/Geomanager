@@ -73,9 +73,13 @@ public class Main {
                 }
             }catch (WrongFormatParameterException ex){ex.printStackTrace();}
         } else if(split[0].equals("DELETE")){
-            geograficControler.deleteInformation(s);
+            try {
+                geograficControler.deleteInformation(s);
+            } catch (WrongFormatParameterException ex) {
+                ex.printStackTrace();
+            }
         }else{
-            System.out.println("Please enter a valid command");
+            System.out.println("\nPlease enter a valid command");
         }
     }
 

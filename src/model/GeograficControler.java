@@ -5,8 +5,10 @@ import exceptions.CountryNotFoundException;
 import exceptions.WrongFormatParameterException;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
-public class GeograficControler {
+public class GeograficControler implements Comparable<Location>{
     private ArrayList<Country> countries;
     private ArrayList<City> cities;
 
@@ -60,17 +62,72 @@ public class GeograficControler {
             throw new WrongFormatParameterException();
         }
     }
+    public void orderData(String command) throws WrongFormatParameterException {
+        String [] commands = command.split(" ORDER BY ");
+        ArrayList<Location> tem = searchData(commands[0]);
+        if(commands[0].contains("countries") && ( commands[1].equals("id") || commands[1].equals("name") || commands[1].equals("population") || commands[1].equals("countryCode"))){
+            ArrayList<Country> country = new ArrayList<>();
+            for (Location l :tem){
+                country.add((Country)l);
+            }
+            country=orderingDataCountry(country,commands[1]);
+            tem.clear();
+            tem.addAll(country);
+            printLocation(tem);
+            return;
+        }else if (commands[0].contains("cities") && ( commands[1].equals("id") || commands[1].equals("name") || commands[1].equals("countryID") || commands[1].equals("population"))){
+            ArrayList<City> cities = new ArrayList<>();
+            for (Location l :tem){
+                cities.add((City)l);
+            }
+            cities=orderingDataCity(cities,commands[1]);
+            tem.clear();
+            tem.addAll(cities);
+            printLocation(tem);
+            return;
+        }
+        throw new WrongFormatParameterException();
+    }
+    public ArrayList<Country> orderingDataCountry(ArrayList<Country> arr, String parameter){
+        if(parameter.equals("id")) {
+            Collections.sort(arr, Comparator.comparing(Location::getId));
+        } else if(parameter.equals("name")) {
+            Collections.sort(arr, Comparator.comparing(Location::getName));
+        } else if(parameter.equals("population")) {
+            Collections.sort(arr, Comparator.comparing(Country::getPopulation));
+        }else if(parameter.equals("countryCode")) {
+            Collections.sort(arr, Comparator.comparing(Country::getCountryCode));
+        }
+        return arr;
+    }
+    public ArrayList<City> orderingDataCity(ArrayList<City> arr, String parameter){
+        if(parameter.equals("id")) {
+            Collections.sort(arr, Comparator.comparing(Location::getId));
+        } else if(parameter.equals("name")) {
+            Collections.sort(arr, Comparator.comparing(Location::getName));
+        } else if(parameter.equals("population")) {
+            Collections.sort(arr, Comparator.comparing(City::getCountryID));
+        }else if(parameter.equals("countryCode")) {
+            Collections.sort(arr, Comparator.comparing(City::getPopulation));
+        }
+        return arr;
+    }
     public void searchingData(String command) throws WrongFormatParameterException {
         ArrayList<Location> tem;
         tem = searchData(command);
         printLocation(tem);
     }
     public void printLocation(ArrayList<Location> tem){
-        for (Location l:tem){
-            System.out.println(l.print());
+        if(tem.size()!=0) {
+            for (Location l : tem) {
+                System.out.println(l.print());
+            }
+        }else {
+            System.out.println("No locations have been found that meet these conditions");
         }
     }
     public ArrayList<Location> searchData(String command) throws WrongFormatParameterException {
+        System.out.println(command);
         String[] iniCommands = command.split(" ");
         if(iniCommands[1].equals("*") && iniCommands[2].equals("FROM")){
             if(iniCommands.length==8){
@@ -102,7 +159,7 @@ public class GeograficControler {
                                 }
                             } else if (iniCommands[3].equals("cities") && iniCommands[5].equals("population") ) {
                                 //Metodo de busqueda por numero
-                                if(iniCommands[6].equals("<")){
+                                if(iniCommands[6].equals(">")){
                                     return searchingDataInequality(number,false,true);
                                 }else {
                                     return searchingDataInequality(number,false,false);
@@ -113,7 +170,7 @@ public class GeograficControler {
                     }
                 }
             }else if(iniCommands.length==4){
-                //Que muestretodo de un pais o ciudad
+                //Que muestra todo de un pais o ciudad
                 if(iniCommands[3].equals("countries")){
                     return searchingDataAll(true);
                 } else if (iniCommands[3].equals("cities")) {
@@ -255,12 +312,26 @@ public class GeograficControler {
         }
         return true;
     }
-
-    public void orderData(String command) {
-
-    }
-    public void deleteInformation(String command) {
-
+    public void deleteInformation(String command) throws WrongFormatParameterException {
+        ArrayList<Location> tem;
+        String out = command.replace("DELETE ", "SELECT * ");
+        tem=searchData(out);
+        if(command.contains("countries")){
+            ArrayList<Country> country = new ArrayList<>();
+            for (Location l :tem){
+                country.add((Country)l);
+            }
+            countries.removeAll(country);
+            return;
+        } else if (command.contains("cities")) {
+            ArrayList<City> city = new ArrayList<>();
+            for (Location l :tem){
+                city.add((City)l);
+            }
+            cities.removeAll(city);
+            return;
+        }
+        throw new WrongFormatParameterException();
     }
 
     public void importSQLFile() {
@@ -282,5 +353,10 @@ public class GeograficControler {
             if(c.getId().equals(id)) return true;
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(Location o) {
+        return 0;
     }
 }

@@ -27,6 +27,6 @@ public class Country extends Location {
     }
     @Override
     public String print(){
-        return "Country ID:"+getId()+"\n Country Name"+getName()+"\n Country population"+population+"\n Country code"+countryCode;
+        return "\nCountry ID: "+getId()+"\nCountry Name: "+getName()+"\nCountry population: "+population+"\nCountry code: "+countryCode+"\n";
     }
 }

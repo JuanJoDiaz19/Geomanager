@@ -27,6 +27,6 @@ public class City extends Location {
     }
     @Override
     public String print(){
-        return super.print()+"City ID:"+getId()+"\n City Name"+getName()+"\n Country ID"+countryID+"\n City population"+population;
+        return "\nCity ID: "+getId()+"\nCity Name: "+getName()+"\nCountry ID: "+countryID+"\nCity population: "+population+"\n";
     }
 }
