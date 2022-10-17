@@ -25,4 +25,8 @@ public class Country extends Location {
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
+    @Override
+    public String print(){
+        return "\nCountry ID: "+getId()+"\nCountry Name: "+getName()+"\nCountry population: "+population+"\nCountry code: "+countryCode+"\n";
+    }
 }

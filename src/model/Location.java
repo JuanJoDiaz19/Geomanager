@@ -10,7 +10,7 @@ public abstract class Location {
     }
 
     public String print(){
-        return id + " " + name;
+        return "";
     }
 
     public String getId() {
