@@ -1,8 +1,5 @@
 package ui;
 
-import exceptions.CountryNotFoundException;
-import exceptions.WrongFormatParameterException;
-import exceptions.AlreadyExists;
 import model.GeograficControler;
 
 import java.util.Scanner;
@@ -19,33 +16,38 @@ public class Main {
     public void execute() {
         geograficControler = new GeograficControler();
         sc = new Scanner(System.in);
-        System.out.println("==============================="+
-                            "\n    WELCOME TO GEOMANAGER    "+
-                            "\n===============================\n");
+        System.out.println("===============================" +
+                "\n    WELCOME TO GEOMANAGER    " +
+                "\n===============================");
         int option = 0;
         do {
-            System.out.println("Select one of the following options:\n"+
+            System.out.println("\nSelect one of the following options:\n" +
                     "1. Insert command\n" +
                     "2. Import data from .SQL file\n" +
                     "3. Leave\n");
             try {
                 option = Integer.parseInt(sc.nextLine());
                 executeOption(option);
-            }catch (NumberFormatException ex){
+            } catch (NumberFormatException ex) {
                 ex.printStackTrace();
             }
         } while (option != 3);
     }
 
     public void executeOption(int option) {
-        switch (option){
+        switch (option) {
             case 1:
-                selectionOfCommand();
+                System.out.println("Enter the command: ");
+                String s = sc.nextLine();
+                geograficControler.selectionOfCommand(s);
                 break;
             case 2:
-                geograficControler.importSQLFile();
+                System.out.println("Please enter the path of the file: ");
+                String path = sc.nextLine();
+                geograficControler.importSQLFile(path);
                 break;
             case 3:
+                geograficControler.saveData();
                 System.out.println("Bye :)");
                 break;
             default:
@@ -54,33 +56,5 @@ public class Main {
         }
     }
 
-    public void selectionOfCommand() {
-        System.out.println("Enter the command: ");
-        String s = sc.nextLine();
-        String[] split = s.split(" ");
-        if(split[0].equals("INSERT")){
-            try {
-                geograficControler.addData(s);
-            } catch (WrongFormatParameterException | CountryNotFoundException | AlreadyExists ex) {
-                ex.printStackTrace();
-            }
-        } else if (split[0].equals("SELECT")) {
-            try {
-                if (s.contains("ORDER BY")) {
-                    geograficControler.orderData(s);
-                } else {
-                    geograficControler.searchingData(s);
-                }
-            }catch (WrongFormatParameterException ex){ex.printStackTrace();}
-        } else if(split[0].equals("DELETE")){
-            try {
-                geograficControler.deleteInformation(s);
-            } catch (WrongFormatParameterException ex) {
-                ex.printStackTrace();
-            }
-        }else{
-            System.out.println("\nPlease enter a valid command");
-        }
-    }
 
 }

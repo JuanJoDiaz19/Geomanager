@@ -1,10 +1,14 @@
 package model;
 
+import com.google.gson.Gson;
 import exceptions.AlreadyExists;
 import exceptions.CountryNotFoundException;
 import exceptions.WrongFormatParameterException;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -15,6 +19,36 @@ public class GeograficControler implements Comparable<Location>{
     public GeograficControler() {
         countries = new ArrayList<>();
         cities = new ArrayList<>();
+        loadData();
+    }
+
+    public void selectionOfCommand(String s) {
+        String[] split = s.split(" ");
+        if (split[0].equals("INSERT")) {
+            try {
+                addData(s);
+            } catch (WrongFormatParameterException | CountryNotFoundException | AlreadyExists ex) {
+                ex.printStackTrace();
+            }
+        } else if (split[0].equals("SELECT")) {
+            try {
+                if (s.contains("ORDER BY")) {
+                    orderData(s);
+                } else {
+                    searchingData(s);
+                }
+            } catch (WrongFormatParameterException ex) {
+                ex.printStackTrace();
+            }
+        } else if (split[0].equals("DELETE")) {
+            try {
+                deleteInformation(s);
+            } catch (WrongFormatParameterException ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            System.out.println("\nPlease enter a valid command");
+        }
     }
     public void addData(String command) throws WrongFormatParameterException, CountryNotFoundException, AlreadyExists {
         String[] arrCommand = command.split(" VALUES ");
@@ -127,7 +161,7 @@ public class GeograficControler implements Comparable<Location>{
         }
     }
     public ArrayList<Location> searchData(String command) throws WrongFormatParameterException {
-        System.out.println(command);
+        //System.out.println(command);
         String[] iniCommands = command.split(" ");
         if(iniCommands[1].equals("*") && iniCommands[2].equals("FROM")){
             if(iniCommands.length==8){
@@ -333,15 +367,6 @@ public class GeograficControler implements Comparable<Location>{
         }
         throw new WrongFormatParameterException();
     }
-
-    public void importSQLFile() {
-
-    }
-
-    public void saveData(){
-
-    }
-
     public boolean searchCityByID(String id) {
         for (City c: cities) {
             if(c.getId().equals(id)) return true;
@@ -354,9 +379,93 @@ public class GeograficControler implements Comparable<Location>{
         }
         return false;
     }
-
     @Override
     public int compareTo(Location o) {
         return 0;
+    }
+    public void saveData() {
+        Gson gsonCountries = new Gson();
+        String jsonCountries = gsonCountries.toJson(countries);
+        try {
+            FileOutputStream fos = new FileOutputStream(new File("DataBaseCountries.json"));
+            fos.write(jsonCountries.getBytes(StandardCharsets.UTF_8));
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Gson gsonCities = new Gson();
+        String jsonCities = gsonCities.toJson(countries);
+        //System.out.println(json);
+        try {
+            FileOutputStream fos = new FileOutputStream(new File("DataBaseCities.json"));
+            fos.write(jsonCities.getBytes(StandardCharsets.UTF_8));
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadData() {
+        try {
+            File file = new File("DataBaseCountries.json");
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            String json = "";
+            String line;
+            while ((line = reader.readLine()) != null) {
+                json += line;
+            }
+            if(!json.equals("")) {
+                Gson gson = new Gson();
+                Country[] count = gson.fromJson(json, Country[].class);
+                countries.addAll(Arrays.asList(count));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            File file = new File("DataBaseCities.json");
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            String json = "";
+            String line;
+            while ((line = reader.readLine()) != null) {
+                json += line;
+            }
+            if(!json.equals("")) {
+                Gson gson = new Gson();
+                City[] cit = gson.fromJson(json, City[].class);
+                cities.addAll(Arrays.asList(cit));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void importSQLFile(String path) {
+        File file = new File(path);
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("\n********** Executing command **********\n" + line);
+                selectionOfCommand(line);
+
+            }
+            fis.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
