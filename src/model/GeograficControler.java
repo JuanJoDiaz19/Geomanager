@@ -39,11 +39,13 @@ public class GeograficControler implements Comparable<Location>{
                 }
             } catch (WrongFormatParameterException ex) {
                 ex.printStackTrace();
+            } catch (CountryNotFoundException e) {
+                throw new RuntimeException(e);
             }
         } else if (split[0].equals("DELETE")) {
             try {
                 deleteInformation(s);
-            } catch (WrongFormatParameterException ex) {
+            } catch (WrongFormatParameterException | CountryNotFoundException ex) {
                 ex.printStackTrace();
             }
         } else {
@@ -96,7 +98,7 @@ public class GeograficControler implements Comparable<Location>{
             throw new WrongFormatParameterException();
         }
     }
-    public void orderData(String command) throws WrongFormatParameterException {
+    public void orderData(String command) throws WrongFormatParameterException, CountryNotFoundException {
         String [] commands = command.split(" ORDER BY ");
         ArrayList<Location> tem = searchData(commands[0]);
         if(commands[0].contains("countries") && ( commands[1].equals("id") || commands[1].equals("name") || commands[1].equals("population") || commands[1].equals("countryCode"))){
@@ -146,7 +148,7 @@ public class GeograficControler implements Comparable<Location>{
         }
         return arr;
     }
-    public void searchingData(String command) throws WrongFormatParameterException {
+    public void searchingData(String command) throws WrongFormatParameterException, CountryNotFoundException {
         ArrayList<Location> tem;
         tem = searchData(command);
         printLocation(tem);
@@ -160,7 +162,7 @@ public class GeograficControler implements Comparable<Location>{
             System.out.println("No locations have been found that meet these conditions");
         }
     }
-    public ArrayList<Location> searchData(String command) throws WrongFormatParameterException {
+    public ArrayList<Location> searchData(String command) throws WrongFormatParameterException, CountryNotFoundException {
         //System.out.println(command);
         String[] iniCommands = command.split(" ");
         if(iniCommands[1].equals("*") && iniCommands[2].equals("FROM")){
@@ -174,10 +176,13 @@ public class GeograficControler implements Comparable<Location>{
                             iniCommands[7]=iniCommands[7].replace("'","");
                             if (iniCommands[3].equals("countries") && (iniCommands[5].equals("id") || iniCommands[5].equals("name") || iniCommands[5].equals("population") || iniCommands[5].equals("countryCode")) ) {
                                 //metodo de busqueda por string
-                                return searchingDataEquals(iniCommands[5],true,iniCommands[7]);
-                            } else if (iniCommands[3].equals("cities") && (iniCommands[5].equals("id") || iniCommands[5].equals("name") || iniCommands[5].equals("countryID") || iniCommands[5].equals("population"))) {
+                                return searchingDataEquals(iniCommands[5],true,iniCommands[7],"");
+                            } else if (iniCommands[3].equals("cities") && (iniCommands[5].equals("id") || iniCommands[5].equals("name") || iniCommands[5].equals("countryID") || iniCommands[5].equals("population") || iniCommands[5].equals("country"))) {
                                 //metodo de busqueda por string
-                                return searchingDataEquals(iniCommands[5],false,iniCommands[7]);
+                                if(iniCommands[5].equals("country")){
+                                    return searchingDataEquals(iniCommands[5],false,iniCommands[7],iniCommands[7]);
+                                }
+                                return searchingDataEquals(iniCommands[5],false,iniCommands[7],"");
                             }
                         }
                     }else { //Cuando es un '<' o '>' se compara a un valor entero
@@ -256,7 +261,7 @@ public class GeograficControler implements Comparable<Location>{
         }
         return tem;
     }
-    public ArrayList<Location> searchingDataEquals(String searchBy,boolean isCountry,String searching){
+    public ArrayList<Location> searchingDataEquals(String searchBy,boolean isCountry,String searching, String contryID) throws CountryNotFoundException {
         ArrayList<Location> tem = new ArrayList<>();
         if(isCountry) {
             if(searchBy.equals("id")) {
@@ -318,8 +323,24 @@ public class GeograficControler implements Comparable<Location>{
                     }
                 }
             }
+            else if (searchBy.equals("country")) {
+                String contryId = searchCountryId(contryID);
+                for (City c: cities){
+                    if(c.getCountryID().equals(contryId)){
+                        tem.add(c);
+                    }
+                }
+            }
         }
         return tem;
+    }
+    public String searchCountryId(String countryname) throws CountryNotFoundException {
+        for(Country c: countries){
+            if(c.getName().equals(countryname)){
+                return c.getId();
+            }
+        }
+        throw new CountryNotFoundException();
     }
     public boolean isStringFormatPar(String string){
         return string.charAt(0) == '(' && string.charAt(string.length()-1) == ')';
@@ -346,7 +367,7 @@ public class GeograficControler implements Comparable<Location>{
         }
         return true;
     }
-    public void deleteInformation(String command) throws WrongFormatParameterException {
+    public void deleteInformation(String command) throws WrongFormatParameterException, CountryNotFoundException {
         ArrayList<Location> tem;
         String out = command.replace("DELETE ", "SELECT * ");
         tem=searchData(out);
@@ -356,6 +377,7 @@ public class GeograficControler implements Comparable<Location>{
                 country.add((Country)l);
             }
             countries.removeAll(country);
+            System.out.println("All countries with these conditions have been removed");
             return;
         } else if (command.contains("cities")) {
             ArrayList<City> city = new ArrayList<>();
@@ -363,6 +385,7 @@ public class GeograficControler implements Comparable<Location>{
                 city.add((City)l);
             }
             cities.removeAll(city);
+            System.out.println("All cities with these conditions have been removed");
             return;
         }
         throw new WrongFormatParameterException();
