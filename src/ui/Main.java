@@ -24,14 +24,15 @@ public class Main {
             System.out.println("\nSelect one of the following options:\n" +
                     "1. Insert command\n" +
                     "2. Import data from .SQL file\n" +
-                    "3. Leave\n");
+                    "3. Save data.\n" +
+                    "0. Leave\n");
             try {
                 option = Integer.parseInt(sc.nextLine());
                 executeOption(option);
             } catch (NumberFormatException ex) {
                 ex.printStackTrace();
             }
-        } while (option != 3);
+        } while (option != 0);
     }
 
     public void executeOption(int option) {
@@ -48,7 +49,7 @@ public class Main {
                 break;
             case 3:
                 geograficControler.saveData();
-                System.out.println("Bye :)");
+                System.out.println("The data has been saved.");
                 break;
             default:
                 System.out.println("Please chose an available option :)");
