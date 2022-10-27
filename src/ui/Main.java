@@ -1,5 +1,8 @@
 package ui;
 
+import exceptions.AlreadyExists;
+import exceptions.CountryNotFoundException;
+import exceptions.WrongFormatParameterException;
 import model.GeograficControler;
 
 import java.util.Scanner;
@@ -40,7 +43,11 @@ public class Main {
             case 1:
                 System.out.println("Enter the command: ");
                 String s = sc.nextLine();
-                geograficControler.selectionOfCommand(s);
+                try {
+                    System.out.println(geograficControler.selectionOfCommand(s));
+                } catch (CountryNotFoundException | AlreadyExists | WrongFormatParameterException e) {
+                    e.printStackTrace();
+                }
                 break;
             case 2:
                 System.out.println("Please enter the path of the file: ");
@@ -50,6 +57,9 @@ public class Main {
             case 3:
                 geograficControler.saveData();
                 System.out.println("The data has been saved.");
+                break;
+            case 0:
+                System.out.println("Byeeee :)");
                 break;
             default:
                 System.out.println("Please chose an available option :)");

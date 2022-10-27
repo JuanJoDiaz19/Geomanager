@@ -22,37 +22,23 @@ public class GeograficControler implements Comparable<Location>{
         loadData();
     }
 
-    public void selectionOfCommand(String s) {
+    public String selectionOfCommand(String s) throws CountryNotFoundException, WrongFormatParameterException, AlreadyExists {
         String[] split = s.split(" ");
         if (split[0].equals("INSERT")) {
-            try {
-                addData(s);
-            } catch (WrongFormatParameterException | CountryNotFoundException | AlreadyExists ex) {
-                ex.printStackTrace();
-            }
+            return addData(s);
         } else if (split[0].equals("SELECT")) {
-            try {
-                if (s.contains("ORDER BY")) {
-                    orderData(s);
-                } else {
-                    searchingData(s);
-                }
-            } catch (WrongFormatParameterException ex) {
-                ex.printStackTrace();
-            } catch (CountryNotFoundException e) {
-                throw new RuntimeException(e);
+            if (s.contains("ORDER BY")) {
+                return orderData(s);
+            } else {
+                return searchingData(s);
             }
         } else if (split[0].equals("DELETE")) {
-            try {
-                deleteInformation(s);
-            } catch (WrongFormatParameterException | CountryNotFoundException ex) {
-                ex.printStackTrace();
-            }
+            return deleteInformation(s);
         } else {
-            System.out.println("\nPlease enter a valid command");
+            return "\nPlease enter a valid command";
         }
     }
-    public void addData(String command) throws WrongFormatParameterException, CountryNotFoundException, AlreadyExists {
+    public String addData(String command) throws WrongFormatParameterException, CountryNotFoundException, AlreadyExists {
         String[] arrCommand = command.split(" VALUES ");
         if(arrCommand[0].equals("INSERT INTO countries(id, name, population, countryCode)")){
             String values = arrCommand[1].replace(" " ,"");
@@ -65,8 +51,7 @@ public class GeograficControler implements Comparable<Location>{
                     String[] finalParameters = values.split(",");
                     if(!searchCountryByID(finalParameters[0])) {
                         countries.add(new Country(finalParameters[0], finalParameters[1], Double.parseDouble(finalParameters[2]), finalParameters[3]));
-                        System.out.println("The country was added :)");
-                        return;
+                        return "The country was added :)";
                     }else {
                         throw new AlreadyExists();
                     }
@@ -85,8 +70,7 @@ public class GeograficControler implements Comparable<Location>{
                     if(!searchCityByID(finalParameters[0])){
                         if (searchCountryByID(finalParameters[2])) {
                             cities.add(new City(finalParameters[0], finalParameters[1], finalParameters[2], Double.parseDouble(finalParameters[3])));
-                            System.out.println("The city was added :)");
-                            return;
+                            return "The city was added :)";
                         } else {
                             throw new CountryNotFoundException();
                         }
@@ -97,8 +81,9 @@ public class GeograficControler implements Comparable<Location>{
             }
             throw new WrongFormatParameterException();
         }
+        return "";
     }
-    public void orderData(String command) throws WrongFormatParameterException, CountryNotFoundException {
+    public String orderData(String command) throws WrongFormatParameterException, CountryNotFoundException {
         String [] commands = command.split(" ORDER BY ");
         ArrayList<Location> tem = searchData(commands[0]);
         if(commands[0].contains("countries") && ( commands[1].equals("id") || commands[1].equals("name") || commands[1].equals("population") || commands[1].equals("countryCode"))){
@@ -109,8 +94,7 @@ public class GeograficControler implements Comparable<Location>{
             country=orderingDataCountry(country,commands[1]);
             tem.clear();
             tem.addAll(country);
-            printLocation(tem);
-            return;
+            return printLocation(tem);
         }else if (commands[0].contains("cities") && ( commands[1].equals("id") || commands[1].equals("name") || commands[1].equals("countryID") || commands[1].equals("population"))){
             ArrayList<City> cities = new ArrayList<>();
             for (Location l :tem){
@@ -119,8 +103,7 @@ public class GeograficControler implements Comparable<Location>{
             cities=orderingDataCity(cities,commands[1]);
             tem.clear();
             tem.addAll(cities);
-            printLocation(tem);
-            return;
+            return printLocation(tem);
         }
         throw new WrongFormatParameterException();
     }
@@ -148,19 +131,21 @@ public class GeograficControler implements Comparable<Location>{
         }
         return arr;
     }
-    public void searchingData(String command) throws WrongFormatParameterException, CountryNotFoundException {
+    public String searchingData(String command) throws WrongFormatParameterException, CountryNotFoundException {
         ArrayList<Location> tem;
         tem = searchData(command);
-        printLocation(tem);
+        return printLocation(tem);
     }
-    public void printLocation(ArrayList<Location> tem){
+    public String printLocation(ArrayList<Location> tem){
+        StringBuilder out = new StringBuilder();
         if(tem.size()!=0) {
             for (Location l : tem) {
-                System.out.println(l.print());
+                out.append(l.print());
             }
         }else {
-            System.out.println("No locations have been found that meet these conditions");
+            out.append("No locations have been found that meet these conditions");
         }
+        return out.toString();
     }
     public ArrayList<Location> searchData(String command) throws WrongFormatParameterException, CountryNotFoundException {
         //System.out.println(command);
@@ -367,7 +352,7 @@ public class GeograficControler implements Comparable<Location>{
         }
         return true;
     }
-    public void deleteInformation(String command) throws WrongFormatParameterException, CountryNotFoundException {
+    public String deleteInformation(String command) throws WrongFormatParameterException, CountryNotFoundException {
         ArrayList<Location> tem;
         String out = command.replace("DELETE ", "SELECT * ");
         tem=searchData(out);
@@ -377,16 +362,14 @@ public class GeograficControler implements Comparable<Location>{
                 country.add((Country)l);
             }
             countries.removeAll(country);
-            System.out.println("All countries with these conditions have been removed");
-            return;
+            return "All countries with these conditions have been removed";
         } else if (command.contains("cities")) {
             ArrayList<City> city = new ArrayList<>();
             for (Location l :tem){
                 city.add((City)l);
             }
             cities.removeAll(city);
-            System.out.println("All cities with these conditions have been removed");
-            return;
+            return "All cities with these conditions have been removed";
         }
         throw new WrongFormatParameterException();
     }
@@ -481,14 +464,31 @@ public class GeograficControler implements Comparable<Location>{
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println("\n********** Executing command **********\n" + line);
-                selectionOfCommand(line);
-
+                try {
+                    System.out.println(selectionOfCommand(line));
+                } catch (CountryNotFoundException | WrongFormatParameterException | AlreadyExists e) {
+                    e.printStackTrace();
+                }
             }
             fis.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public ArrayList<Country> getCountries() {
+        return countries;
+    }
+
+    public void setCountries(ArrayList<Country> countries) {
+        this.countries = countries;
+    }
+
+    public ArrayList<City> getCities() {
+        return cities;
+    }
+
+    public void setCities(ArrayList<City> cities) {
+        this.cities = cities;
     }
 }
