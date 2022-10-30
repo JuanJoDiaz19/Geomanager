@@ -192,7 +192,5 @@ class GeograficControlerTest {
         } catch (CountryNotFoundException | WrongFormatParameterException | AlreadyExists e) {
             throw new RuntimeException(e);
         }
-
     }
-
 }
