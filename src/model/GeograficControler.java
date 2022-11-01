@@ -7,10 +7,7 @@ import exceptions.WrongFormatParameterException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class GeograficControler implements Comparable<Location>{
     private ArrayList<Country> countries;
@@ -46,16 +43,28 @@ public class GeograficControler implements Comparable<Location>{
                 values = values.replace("(", "");
                 values = values.replace(")", "");
                 String[] parameters = values.split(",");
-                if (isStringFormat(parameters[0]) || isStringFormat(parameters[1]) || isStringFormat(parameters[3]) || isDoubleNumber(parameters[2])){
-                    values = values.replace("'", "");
-                    String[] finalParameters = values.split(",");
-                    if(!searchCountryByID(finalParameters[0])) {
-                        countries.add(new Country(finalParameters[0], finalParameters[1], Double.parseDouble(finalParameters[2]), finalParameters[3]));
+                if(parameters.length == 4) {
+                    if (isStringFormat(parameters[0]) || isStringFormat(parameters[1]) || isStringFormat(parameters[3]) || isDoubleNumber(parameters[2])){
+                        values = values.replace("'", "");
+                        String[] finalParameters = values.split(",");
+                        if(!searchCountryByID(finalParameters[0])) {
+                            countries.add(new Country(finalParameters[0], finalParameters[1], Double.parseDouble(finalParameters[2]), finalParameters[3]));
+                            return "The country was added :)";
+                        }else {
+                            throw new AlreadyExists();
+                        }
+                    }
+                } else if(parameters.length == 3){
+                    //Aqui entra cuando la persona no le coloca el ID:
+                    if (isStringFormat(parameters[0]) ||  isDoubleNumber(parameters[1]) || isStringFormat(parameters[2])){
+                        values = values.replace("'", "");
+                        String[] finalParameters = values.split(",");
+                        UUID uuid = UUID.randomUUID();
+                        countries.add(new Country(uuid.toString(), finalParameters[0], Double.parseDouble(finalParameters[1]), finalParameters[2]));
                         return "The country was added :)";
-                    }else {
-                        throw new AlreadyExists();
                     }
                 }
+
             }
             throw new WrongFormatParameterException();
         } else if ( arrCommand[0].equals("INSERT INTO cities(id, name, countryID, population)")) {
@@ -64,20 +73,35 @@ public class GeograficControler implements Comparable<Location>{
                 values = values.replace("(", "");
                 values = values.replace(")", "");
                 String[] parameters = values.split(",");
-                if (isStringFormat(parameters[0]) || isStringFormat(parameters[1]) || isStringFormat(parameters[2]) || isDoubleNumber(parameters[3])){
-                    values = values.replace("'", "");
-                    String[] finalParameters = values.split(",");
-                    if(!searchCityByID(finalParameters[0])){
-                        if (searchCountryByID(finalParameters[2])) {
-                            cities.add(new City(finalParameters[0], finalParameters[1], finalParameters[2], Double.parseDouble(finalParameters[3])));
+                if(parameters.length == 4 ) {
+                    if (isStringFormat(parameters[0]) || isStringFormat(parameters[1]) || isStringFormat(parameters[2]) || isDoubleNumber(parameters[3])){
+                        values = values.replace("'", "");
+                        String[] finalParameters = values.split(",");
+                        if(!searchCityByID(finalParameters[0])){
+                            if (searchCountryByID(finalParameters[2])) {
+                                cities.add(new City(finalParameters[0], finalParameters[1], finalParameters[2], Double.parseDouble(finalParameters[3])));
+                                return "The city was added :)";
+                            } else {
+                                throw new CountryNotFoundException();
+                            }
+                        }else {
+                            throw new AlreadyExists();
+                        }
+                    }
+                } else if (parameters.length == 3){
+                    if (isStringFormat(parameters[0]) || isStringFormat(parameters[1]) || isDoubleNumber(parameters[2])){
+                        values = values.replace("'", "");
+                        String[] finalParameters = values.split(",");
+                        if (searchCountryByID(finalParameters[1])) {
+                            UUID uuid = UUID.randomUUID();
+                            cities.add(new City(uuid.toString(), finalParameters[0], finalParameters[1], Double.parseDouble(finalParameters[2])));
                             return "The city was added :)";
                         } else {
                             throw new CountryNotFoundException();
                         }
-                    }else {
-                        throw new AlreadyExists();
                     }
                 }
+
             }
             throw new WrongFormatParameterException();
         }
