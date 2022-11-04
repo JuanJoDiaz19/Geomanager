@@ -426,7 +426,7 @@ public class GeograficControler implements Comparable<Location>{
             e.printStackTrace();
         }
         Gson gsonCities = new Gson();
-        String jsonCities = gsonCities.toJson(countries);
+        String jsonCities = gsonCities.toJson(cities);
         //System.out.println(json);
         try {
             FileOutputStream fos = new FileOutputStream(new File("DataBaseCities.json"));
